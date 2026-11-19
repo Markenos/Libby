@@ -1,6 +1,6 @@
 cask "libby" do
-  version "0.0.0"
-  sha256 :no_check
+  version "0.1.1"
+  sha256 "892f33a0c1b6cb561094006a5545483a790bf00242f664c02b2a32e4a9162818"
 
   url "https://github.com/Markenos/Libby/releases/download/v#{version}/Libby.zip"
   name "Libby"
