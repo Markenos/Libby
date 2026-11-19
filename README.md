@@ -14,6 +14,7 @@ Everything is read straight from your Mac. Sending and managing go through Mail 
 
 ```bash
 brew tap markenos/libby https://github.com/Markenos/Libby
+brew trust markenos/libby
 brew install --cask libby
 ```
 
