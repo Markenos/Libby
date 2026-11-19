@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "Casks/**"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Version
+        run: echo "VERSION=0.1.${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          xcodebuild -project Libby.xcodeproj -scheme Libby -configuration Release \
+            -derivedDataPath build/dd \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            build
+          codesign --force --deep --sign - build/dd/Build/Products/Release/Libby.app
+          ditto -c -k --keepParent build/dd/Build/Products/Release/Libby.app Libby.zip
+          echo "SHA=$(shasum -a 256 Libby.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$VERSION" Libby.zip \
+            --title "Libby $VERSION" \
+            --notes "Built from ${GITHUB_SHA::7}. Update with: brew update && brew upgrade --cask libby"
+
+      - name: Update cask
+        run: |
+          sed -i '' -E "s/^  version \".*\"/  version \"$VERSION\"/; s/^  sha256 .*/  sha256 \"$SHA\"/" Casks/libby.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/libby.rb
+          git commit -m "Cask: Libby $VERSION [skip ci]"
+          git pull --rebase
+          git push
