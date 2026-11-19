@@ -20,6 +20,7 @@ enum MessagesSource {
         SELECT c.ROWID, c.display_name, c.chat_identifier, c.style,
                m.text, m.attributedBody, m.date, m.is_from_me, m.cache_has_attachments,
                (SELECT group_concat(h.id, '|') FROM chat_handle_join chj JOIN handle h ON h.ROWID = chj.handle_id WHERE chj.chat_id = c.ROWID),
+               c.guid,
                (SELECT count(*) FROM chat_message_join j2 JOIN message m2 ON m2.ROWID = j2.message_id
                   WHERE j2.chat_id = c.ROWID AND m2.is_read = 0 AND m2.is_from_me = 0 AND m2.associated_message_type = 0
                     AND m2.date > c.last_read_message_timestamp)
@@ -48,8 +49,8 @@ enum MessagesSource {
             if text.isEmpty && r.int(8) != 0 { text = "Attachment" }
             if r.int(7) != 0 && !text.isEmpty { text = "You: " + text }
             return Conversation(
-                id: r.int(0), title: title, handles: handles, lastText: text,
-                lastDate: date(r.int(6)), unread: Int(r.int(10)), isGroup: isGroup)
+                id: r.int(0), guid: r.string(10) ?? "", title: title, handles: handles, lastText: text,
+                lastDate: date(r.int(6)), unread: Int(r.int(11)), isGroup: isGroup)
         }
     }
 

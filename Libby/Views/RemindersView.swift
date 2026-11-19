@@ -24,8 +24,8 @@ struct RemindersView: View {
                             ForEach(lists, id: \.0) { name, items in
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack {
-                                        Circle().fill(items.first?.color ?? .accentColor).frame(width: 9, height: 9)
-                                        Text(name).font(.headline)
+                                        IconBadge(symbol: "list.bullet", tint: items.first?.color ?? .accentColor, size: 30)
+                                        Text(name).font(.system(.title3, design: .rounded).weight(.bold))
                                         Spacer()
                                         Text("\(items.filter { !$0.isCompleted }.count)")
                                             .font(.subheadline).foregroundStyle(.secondary)
@@ -34,7 +34,8 @@ struct RemindersView: View {
                                 }
                                 .padding(20)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .glassEffect(.regular, in: .rect(cornerRadius: 24))
+                                .glassEffect(.regular.tint((items.first?.color ?? .clear).opacity(0.12)).interactive(),
+                                             in: .rect(cornerRadius: 28))
                             }
                         }
                     }

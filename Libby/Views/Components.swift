@@ -5,28 +5,80 @@ import SwiftUI
 struct GlassCard<Content: View>: View {
     var title: String? = nil
     var symbol: String? = nil
+    var tint: Color = .accentColor
+    var subtitle: String? = nil
     var action: (() -> Void)? = nil
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             if let title {
-                HStack(spacing: 8) {
-                    if let symbol { Image(systemName: symbol).foregroundStyle(.secondary) }
-                    Text(title).font(.headline)
+                HStack(spacing: 12) {
+                    if let symbol { IconBadge(symbol: symbol, tint: tint) }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(title).font(.headline)
+                        if let subtitle { Text(subtitle).font(.caption).foregroundStyle(.secondary) }
+                    }
                     Spacer()
                     if let action {
-                        Button(action: action) { Image(systemName: "arrow.up.right") }
-                            .buttonStyle(.borderless)
-                            .foregroundStyle(.secondary)
+                        Button(action: action) {
+                            Image(systemName: "arrow.up.right").font(.caption.weight(.bold))
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
+                        .help("Open \(title)")
                     }
                 }
             }
             content
         }
-        .padding(20)
+        .padding(22)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .glassEffect(.regular, in: .rect(cornerRadius: 26))
+        .glassEffect(.regular.tint(tint.opacity(0.10)).interactive(), in: .rect(cornerRadius: 30))
+    }
+}
+
+/// A small coloured glass disc holding an SF Symbol.
+struct IconBadge: View {
+    let symbol: String
+    let tint: Color
+    var size: CGFloat = 34
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: size * 0.44, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .glassEffect(.regular.tint(tint.opacity(0.85)), in: .circle)
+    }
+}
+
+/// A big number on tinted glass, used in Today's summary row.
+struct StatPill: View {
+    let value: Int
+    let label: String
+    let symbol: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                IconBadge(symbol: symbol, tint: tint, size: 30)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(value)")
+                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .contentTransition(.numericText())
+                    Text(label).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .contentShape(.rect(cornerRadius: 22))
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.tint(tint.opacity(0.16)).interactive(), in: .rect(cornerRadius: 22))
     }
 }
 
@@ -158,17 +210,35 @@ extension EventItem {
     }
 }
 
-/// Plain list row styling used by the two-pane views.
+/// List rows: the selected row floats on tinted, interactive glass that morphs between rows.
 struct RowBackground: ViewModifier {
     let selected: Bool
+    var tint: Color = .accentColor
+    var namespace: Namespace.ID? = nil
+
     func body(content: Content) -> some View {
-        content
+        let row = content
             .padding(.horizontal, 12).padding(.vertical, 10)
-            .background {
-                if selected {
-                    RoundedRectangle(cornerRadius: 14).fill(Color.accentColor.opacity(0.14))
-                }
+            .contentShape(.rect(cornerRadius: 18))
+        if selected {
+            if let namespace {
+                row.glassEffect(.regular.tint(tint.opacity(0.28)).interactive(), in: .rect(cornerRadius: 18))
+                    .glassEffectID("selection", in: namespace)
+            } else {
+                row.glassEffect(.regular.tint(tint.opacity(0.28)).interactive(), in: .rect(cornerRadius: 18))
             }
-            .contentShape(.rect(cornerRadius: 14))
+        } else {
+            row
+        }
+    }
+}
+
+/// A tall glass panel used for the list column in Mail and Messages.
+struct GlassPanel<Content: View>: View {
+    var tint: Color
+    @ViewBuilder var content: Content
+    var body: some View {
+        content
+            .glassEffect(.regular.tint(tint.opacity(0.06)), in: .rect(cornerRadius: 30))
     }
 }

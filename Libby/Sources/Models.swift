@@ -15,13 +15,23 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    var tint: Color {
+        switch self {
+        case .today: .indigo
+        case .mail: .blue
+        case .messages: .green
+        case .calendar: .red
+        case .reminders: .orange
+        }
+    }
+
     var symbol: String {
         switch self {
-        case .today: "sun.max"
-        case .mail: "envelope"
-        case .messages: "message"
+        case .today: "sun.max.fill"
+        case .mail: "envelope.fill"
+        case .messages: "message.fill"
         case .calendar: "calendar"
-        case .reminders: "checklist"
+        case .reminders: "checklist.checked"
         }
     }
 }
@@ -33,10 +43,24 @@ struct MailItem: Identifiable, Hashable {
     let subject: String
     let preview: String
     let date: Date
-    let isRead: Bool
-    let isFlagged: Bool
+    var isRead: Bool
+    var isFlagged: Bool
     let mailbox: String
+    let mailboxURL: String?
     let messageIDHeader: String?
+
+    /// Where Mail's AppleScript can find this message: account UUID, mailbox path, Message-ID.
+    var location: (account: String, mailbox: String, messageID: String)? {
+        guard let url = mailboxURL, let header = messageIDHeader, !header.isEmpty,
+              let schemeEnd = url.range(of: "://") else { return nil }
+        let rest = url[schemeEnd.upperBound...]
+        guard let slash = rest.firstIndex(of: "/") else { return nil }
+        let account = String(rest[..<slash])
+        let path = String(rest[rest.index(after: slash)...]).removingPercentEncoding ?? ""
+        guard !account.isEmpty, !path.isEmpty else { return nil }
+        let mid = header.trimmingCharacters(in: CharacterSet(charactersIn: "<> "))
+        return (account, path, mid)
+    }
 
     /// Opens the message in Mail.app.
     var mailURL: URL? {
@@ -49,6 +73,7 @@ struct MailItem: Identifiable, Hashable {
 
 struct Conversation: Identifiable, Hashable {
     let id: Int64
+    let guid: String
     let title: String
     let handles: [String]
     let lastText: String

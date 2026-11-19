@@ -24,13 +24,14 @@ struct CalendarView: View {
                             ForEach(days, id: \.0) { day, events in
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text(day.dayHeading)
-                                        .font(.headline)
+                                        .font(.system(.title3, design: .rounded).weight(.bold))
                                         .foregroundStyle(Calendar.current.isDateInToday(day) ? Color.accentColor : .primary)
                                     ForEach(events) { e in EventRow(event: e).onTapGesture { model.open(e) } }
                                 }
                                 .padding(20)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .glassEffect(.regular, in: .rect(cornerRadius: 24))
+                                .glassEffect(.regular.tint((Calendar.current.isDateInToday(day) ? AppSection.calendar.tint : (events.first?.color ?? .clear)).opacity(0.10)).interactive(),
+                                             in: .rect(cornerRadius: 28))
                             }
                         }
                     }
@@ -51,7 +52,7 @@ struct EventRow: View {
                 .font(.subheadline.monospacedDigit())
                 .foregroundStyle(.secondary)
                 .frame(width: 70, alignment: .leading)
-            Capsule().fill(event.color).frame(width: 4)
+            Capsule().fill(event.color.gradient).frame(width: 5)
             VStack(alignment: .leading, spacing: 2) {
                 Text(event.title)
                 HStack(spacing: 6) {
@@ -64,6 +65,8 @@ struct EventRow: View {
             Spacer(minLength: 0)
         }
         .fixedSize(horizontal: false, vertical: true)
+        .padding(10)
+        .glassEffect(.regular.tint(event.color.opacity(0.08)).interactive(), in: .rect(cornerRadius: 16))
         .contentShape(.rect)
     }
 }

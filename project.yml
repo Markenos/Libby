@@ -26,12 +26,14 @@ targets:
         NSCalendarsFullAccessUsageDescription: Libby shows your upcoming events alongside your mail and messages.
         NSRemindersFullAccessUsageDescription: Libby shows your reminders and lets you tick them off.
         NSContactsUsageDescription: Libby shows contact names instead of phone numbers in Messages.
+        NSAppleEventsUsageDescription: Libby asks Mail and Messages to send, reply, flag, archive and delete on your behalf.
     entitlements:
       path: Libby/Libby.entitlements
       properties:
         com.apple.security.app-sandbox: false
         com.apple.security.personal-information.calendars: true
         com.apple.security.personal-information.addressbook: true
+        com.apple.security.automation.apple-events: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.markenos.Libby

@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Libby asks Mail and Messages to send, reply, flag, archive and delete on your behalf.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Libby shows your upcoming events alongside your mail and messages.</string>
 	<key>NSContactsUsageDescription</key>

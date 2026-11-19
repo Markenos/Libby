@@ -62,6 +62,7 @@ enum MailSource {
                 isRead: r.int(6) != 0,
                 isFlagged: r.int(7) != 0,
                 mailbox: mailboxName(r.string(8)),
+                mailboxURL: r.string(8),
                 messageIDHeader: header
             )
         }
